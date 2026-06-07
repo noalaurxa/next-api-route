@@ -11,13 +11,14 @@ const globalForPrisma = globalThis as unknown as {
 // Creamos el pool con SSL explícito (no dependemos de sslmode en la URL)
 const pool = new Pool({
   host: "aws-1-us-west-2.pooler.supabase.com",
-  port: 5432,
+  port: 6543,
   database: "postgres",
   user: "postgres.vtcrncyrnpujswiolkih",
   password: "GRS8_?jGDbCivP5",
   ssl: {
     rejectUnauthorized: false,
   },
+  max: 2, // limit connection pool size per serverless instance
 });
 
 export const prisma =
