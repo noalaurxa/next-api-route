@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Book } from '@prisma/client';
 
 export async function GET(
   request: Request,
@@ -22,33 +23,39 @@ export async function GET(
       );
     }
     
-    const books = author.books;
+    const books: Book[] = author.books;
     const totalBooks = books.length;
     
     // Filter books for year statistics
-    const booksWithYear = books.filter(b => b.publishedYear !== null && b.publishedYear !== undefined);
-    const firstBook = booksWithYear.length > 0
-      ? booksWithYear.reduce((min, b) => b.publishedYear! < min.publishedYear! ? b : min, booksWithYear[0])
+    const booksWithYear: Book[] = books.filter((b: Book) => b.publishedYear !== null && b.publishedYear !== undefined);
+    const firstBook: Book | null = booksWithYear.length > 0
+      ? booksWithYear.reduce((min: Book, b: Book) => b.publishedYear! < min.publishedYear! ? b : min, booksWithYear[0])
       : null;
-    const latestBook = booksWithYear.length > 0
-      ? booksWithYear.reduce((max, b) => b.publishedYear! > max.publishedYear! ? b : max, booksWithYear[0])
+    const latestBook: Book | null = booksWithYear.length > 0
+      ? booksWithYear.reduce((max: Book, b: Book) => b.publishedYear! > max.publishedYear! ? b : max, booksWithYear[0])
       : null;
       
     // Filter books for page statistics
-    const booksWithPages = books.filter(b => b.pages !== null && b.pages !== undefined);
-    const averagePages = booksWithPages.length > 0
-      ? Math.round(booksWithPages.reduce((sum, b) => sum + b.pages!, 0) / booksWithPages.length)
+    const booksWithPages: Book[] = books.filter((b: Book) => b.pages !== null && b.pages !== undefined);
+    const averagePages: number = booksWithPages.length > 0
+      ? Math.round(booksWithPages.reduce((sum: number, b: Book) => sum + b.pages!, 0) / booksWithPages.length)
       : 0;
       
-    const longestBook = booksWithPages.length > 0
-      ? booksWithPages.reduce((max, b) => b.pages! > max.pages! ? b : max, booksWithPages[0])
+    const longestBook: Book | null = booksWithPages.length > 0
+      ? booksWithPages.reduce((max: Book, b: Book) => b.pages! > max.pages! ? b : max, booksWithPages[0])
       : null;
       
-    const shortestBook = booksWithPages.length > 0
-      ? booksWithPages.reduce((min, b) => b.pages! < min.pages! ? b : min, booksWithPages[0])
+    const shortestBook: Book | null = booksWithPages.length > 0
+      ? booksWithPages.reduce((min: Book, b: Book) => b.pages! < min.pages! ? b : min, booksWithPages[0])
       : null;
       
-    const genres = Array.from(new Set(books.map(b => b.genre).filter(Boolean)));
+    const genres: string[] = Array.from(
+      new Set(
+        books
+          .map((b: Book) => b.genre)
+          .filter((genre): genre is string => Boolean(genre))
+      )
+    );
     
     return NextResponse.json({
       authorId: author.id,
@@ -69,3 +76,4 @@ export async function GET(
     );
   }
 }
+
